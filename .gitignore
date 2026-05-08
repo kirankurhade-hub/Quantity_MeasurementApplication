@@ -1,0 +1,62 @@
+# ──────────────────────────────────────────────
+# .gitignore — Quantity Measurement App
+# Created : 23-Apr-2026
+# Updated : 09-May-2026
+# ──────────────────────────────────────────────
+
+# ── Maven ──────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mvn/wrapper/maven-wrapper.jar
+
+# ── IDE — IntelliJ IDEA ────────────────────────
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ── IDE — Eclipse ──────────────────────────────
+.classpath
+.project
+.settings/
+bin/
+
+# ── IDE — VS Code ──────────────────────────────
+.vscode/
+
+# ── OS files ───────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Spring Boot ────────────────────────────────
+*.log
+logs/
+spring.log
+
+# ── Environment / Secrets ──────────────────────
+.env
+.env.local
+application-local.properties
+application-local.yml
+
+# ── Node / React (UC19–UC20) ───────────────────
+node_modules/
+dist/
+build/
+.npm
+.yarn-integrity
+
+# ── Docker ─────────────────────────────────────
+.dockerignore
+
+# ── Test reports ───────────────────────────────
+surefire-reports/
+test-results/
