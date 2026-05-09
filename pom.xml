@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Parent POM — Quantity Measurement App
+    Author  : BridgeLabz Dev Team
+    Created : 23-Apr-2026
+    Updated : 09-May-2026
+
+    Multi-module Maven project.
+    Each UC is a sub-module added as it is implemented.
+
+    Changelog:
+      23-Apr-2026 | Parent POM created with Java 17 + JUnit 5 baseline
+      25-Apr-2026 | UC01 module added
+      30-Apr-2026 | Surefire plugin pinned to 3.1.2 for JUnit 5 compatibility
+      09-May-2026 | UC02 module added
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.qm</groupId>
+    <artifactId>quantity-measurement-app</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Quantity Measurement App — Parent</name>
+    <description>
+        BridgeLabz — Quantity Measurement App.
+        22-UC full-stack project covering Core Java → Spring Boot → React → Microservices.
+    </description>
+
+    <!-- ── UC Modules (added progressively) ─────────────────────────── -->
+    <modules>
+        <module>UC01-FeetMeasurementEquality</module>
+        <module>UC02-FeetAndInchesEquality</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>5.10.0</junit.version>
+    </properties>
+
+    <!-- ── Shared dependency versions ───────────────────────────────── -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ── Shared plugins ────────────────────────────────────────────── -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <!-- 30-Apr-2026: Pinned to 3.1.2 — earlier versions skip JUnit 5 tests -->
+                    <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
