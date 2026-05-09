@@ -35,6 +35,7 @@
     <modules>
         <module>UC01-FeetMeasurementEquality</module>
         <module>UC02-FeetAndInchesEquality</module>
+        <module>UC03-GenericQuantityDRY</module>
     </modules>
 
     <properties>
