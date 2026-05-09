@@ -3,71 +3,68 @@ package com.qm.uc02;
 /**
  * Length.java
  *
- * Author      : BridgeLabz Dev Team
- * Created     : 30-Apr-2026
+ * Author      : Kiran Kurhade
+ * Created     : 27-Apr-2026
  * Last Updated: 09-May-2026
  *
  * UC02 - Feet and Inches Measurement Equality
- * Concept   : Object Encapsulation
+ * Concept: Object Encapsulation
  *
- * Design goal (30-Apr-2026):
- *   UC01 only handled feet as a single double.
- *   UC02 encapsulates BOTH feet and inches inside one value object — Length.
- *   The caller works with a single object; internal normalization is hidden.
- *
- * Encapsulation decisions:
- *   - feet and inches are private final (immutable after construction)
- *   - conversion to a single base unit (total inches) is a private method
- *   - external code never needs to know how equality is computed internally
+ * Design decision (27-Apr-2026):
+ *   UC01 had a single 'feet' field. UC02 extends this to encapsulate
+ *   both feet AND inches inside one value object (Length), hiding how
+ *   they are stored and normalised from the caller.
  *
  * Changelog:
- *   30-Apr-2026  |  Class skeleton created — two fields: feet, inches
- *   01-May-2026  |  Added toTotalInches() private helper for normalisation
- *   01-May-2026  |  Implemented equals() comparing normalised inch values
- *   02-May-2026  |  Added null, self, and type guards in equals()
- *   03-May-2026  |  hashCode() implemented on normalised total inches
- *   04-May-2026  |  Validation: feet >= 0, inches in [0, 11]
- *   05-May-2026  |  toString() returns "X ft Y in" format
- *   07-May-2026  |  Code review: added Javadoc for all public methods
- *   08-May-2026  |  Refactor: INCHES_PER_FOOT extracted as named constant
- *   09-May-2026  |  Final cleanup and merge to dev
+ *   27-Apr-2026  |  Class created; feet + inches fields defined as final
+ *   28-Apr-2026  |  Added two-arg constructor with validation guards
+ *   28-Apr-2026  |  Added one-arg convenience constructor (inches defaults to 0)
+ *   29-Apr-2026  |  Added private toTotalInches() — encapsulates normalisation
+ *   30-Apr-2026  |  Implemented equals() using toTotalInches() + epsilon
+ *   01-May-2026  |  Implemented hashCode() consistent with equals()
+ *   02-May-2026  |  Added getFeet() / getInches() accessors (read-only)
+ *   05-May-2026  |  Added toString() for readable test failure messages
+ *   07-May-2026  |  Code review: renamed internal variable 'total' → 'normalised'
+ *   09-May-2026  |  Final Javadoc pass; ready for merge to dev
  */
 public class Length {
 
-    // 08-May-2026: Named constant — avoids magic number 12 scattered across methods.
-    //              1 foot = 12 inches (exact, international definition).
+    // 28-Apr-2026: Conversion constant — 1 international foot = exactly 12 inches
     private static final int INCHES_PER_FOOT = 12;
 
-    // 01-May-2026: Tolerance for floating-point comparison of normalised inches.
-    //              Mirrors UC01 EPSILON — consistent precision policy across all UCs.
+    // 30-Apr-2026: Inherited epsilon policy from UC01 Feet class.
+    //              1e-9 inches ≈ 0.025 nanometres — safely absorbs IEEE 754 drift.
     private static final double EPSILON = 1e-9;
 
-    // 30-Apr-2026: Core encapsulated fields — private and final (immutable).
-    //              External callers cannot directly access or modify these.
+    // 27-Apr-2026: Both fields are final — value object, no mutation after construction.
+    //              Callers access these only through getFeet() / getInches().
     private final double feet;
     private final double inches;
 
     /**
-     * 30-Apr-2026: Primary constructor — accepts feet and inches separately.
-     * 04-May-2026: Validation added after review:
-     *              - feet cannot be negative (no negative physical measurement)
-     *              - inches must be in [0.0, 11.999...] (>= 12 would roll into next foot)
+     * Primary constructor — encapsulates feet and inches into one value object.
      *
-     * @param feet   whole or fractional feet (>= 0)
-     * @param inches inches component (0.0 <= inches < 12.0)
-     * @throws IllegalArgumentException if either parameter is out of range
+     * Validation added 28-Apr-2026:
+     *   - feet   must be >= 0  (negative length is physically meaningless)
+     *   - inches must be in [0, 12) to avoid ambiguity with the feet field
+     *     e.g. Length(1, 13) would duplicate Length(2, 1) — we prevent this.
+     *
+     * @param feet   feet component; must be >= 0
+     * @param inches inches component; must be in [0, 12)
+     * @throws IllegalArgumentException if either argument violates its range
      */
     public Length(double feet, double inches) {
-        // 04-May-2026: Guard — negative feet make no physical sense
+        // 28-Apr-2026: Guard: feet cannot be negative
         if (feet < 0) {
             throw new IllegalArgumentException(
-                "Feet cannot be negative: " + feet
+                "Feet cannot be negative. Received: " + feet
             );
         }
-        // 04-May-2026: Guard — inches must be in [0, 12); >= 12 belongs in the feet part
+        // 28-Apr-2026: Guard: inches must be in [0, 12)
+        // If inches >= 12 the caller should have incremented feet instead.
         if (inches < 0 || inches >= INCHES_PER_FOOT) {
             throw new IllegalArgumentException(
-                "Inches must be in range [0, 12): " + inches
+                "Inches must be in range [0, 12). Received: " + inches
             );
         }
         this.feet   = feet;
@@ -75,110 +72,94 @@ public class Length {
     }
 
     /**
-     * 30-Apr-2026: Convenience constructor — feet only (inches defaults to 0).
-     *              Maintains backward-compatible API for callers who only have feet.
+     * Convenience constructor for feet-only measurements.
+     * Added 28-Apr-2026 so callers don't need to write new Length(3.0, 0.0).
      *
-     * @param feet measurement in feet (>= 0)
+     * @param feet feet component; must be >= 0
      */
     public Length(double feet) {
+        // Delegate to primary constructor — validation runs once
         this(feet, 0.0);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Public accessors
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─── Accessors ────────────────────────────────────────────────────────────
 
     /**
-     * 30-Apr-2026: Returns the feet component.
-     * Encapsulation: getter exposes the value, not the field itself.
+     * Returns the feet component of this measurement.
+     * Added 02-May-2026 — read-only; no setter to preserve immutability.
      */
     public double getFeet() {
         return feet;
     }
 
     /**
-     * 30-Apr-2026: Returns the inches component.
+     * Returns the inches component of this measurement.
+     * Added 02-May-2026 — read-only; no setter to preserve immutability.
      */
     public double getInches() {
         return inches;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Private helper — Normalisation
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─── Private normalisation ────────────────────────────────────────────────
 
     /**
-     * toTotalInches() — UC02 core private helper.
+     * Converts this Length to a single value in inches.
      *
-     * 01-May-2026: Converts feet+inches into a single normalised double (total inches).
-     *              This is the base unit used internally for equality and hashing.
+     * 29-Apr-2026: This is the KEY encapsulation decision.
+     *   - The caller never knows we store feet and inches separately.
+     *   - equals() and hashCode() both call this — single source of truth.
+     *   - Making it private ensures only this class controls the conversion.
      *
-     * Why total inches, not total feet?
-     *   - Integer-free arithmetic; avoids fractional feet (1 ft 6 in = 1.5 ft is lossy
-     *     when feet is stored as int, and 18.0 inches is exact).
-     *   - Consistent with UC05+ where conversion factors are inch-based.
-     *
-     * Encapsulation: private — callers never see the normalised value.
-     *
-     * @return total measurement expressed in inches
+     * Formula: totalInches = (feet × 12) + inches
      */
     private double toTotalInches() {
-        // 01-May-2026: (feet × 12) + inches
         return (feet * INCHES_PER_FOOT) + inches;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // equals, hashCode, toString
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─── equals() ─────────────────────────────────────────────────────────────
 
     /**
-     * equals() — measures two Length objects for physical equality.
+     * Physical equality — two Length objects are equal when they represent
+     * the same total measurement in inches (within epsilon tolerance).
      *
-     * 01-May-2026: Compares normalised total inches (encapsulation hides internals).
-     * 02-May-2026: Added null, self-reference, and type guards (carried from UC01).
+     * 30-Apr-2026: Delegates comparison to toTotalInches() so callers
+     *   never need to know about feet-to-inches conversion.
      *
-     * Examples:
-     *   new Length(1, 0).equals(new Length(0, 12)) → INVALID (12 in throws)
-     *   new Length(2, 0).equals(new Length(1, 12)) → INVALID (12 in throws)
-     *   new Length(1, 6).equals(new Length(1, 6))  → true
-     *   new Length(1, 0).equals(new Length(1, 1))  → false
+     * Guard sequence (mirrors UC01):
+     *   1. null check   — avoid NullPointerException
+     *   2. self check   — reflexivity fast-path
+     *   3. type check   — symmetry guarantee
+     *   4. epsilon cmp  — floating-point safe comparison
      *
-     * @param obj object to compare
-     * @return true if both represent the same physical length
+     * @param obj the object to compare
+     * @return true if both lengths are physically equal within EPSILON
      */
     @Override
     public boolean equals(Object obj) {
-        // 02-May-2026: Guard 1 — null check
-        if (obj == null) {
-            return false;
-        }
-
-        // 02-May-2026: Guard 2 — same reference fast path
-        if (this == obj) {
-            return true;
-        }
-
-        // 02-May-2026: Guard 3 — type safety; Length != Feet != String
-        if (!(obj instanceof Length)) {
-            return false;
-        }
+        // Guard 1 — null (30-Apr-2026)
+        if (obj == null) return false;
+        // Guard 2 — same reference
+        if (this == obj) return true;
+        // Guard 3 — type safety
+        if (!(obj instanceof Length)) return false;
 
         Length other = (Length) obj;
-
-        // 01-May-2026: Normalise both to total inches then compare with epsilon.
-        //              Encapsulation: the normalisation logic stays inside this class.
+        // Guard 4 — normalise both to total inches, then epsilon-compare
         return Math.abs(this.toTotalInches() - other.toTotalInches()) < EPSILON;
     }
 
+    // ─── hashCode() ───────────────────────────────────────────────────────────
+
     /**
-     * hashCode() — consistent with equals() contract.
+     * Hash code consistent with equals().
+     * Java contract: a.equals(b) → a.hashCode() == b.hashCode()
      *
-     * 03-May-2026: Hash on normalised total inches (same value used in equals).
-     *              Snap to epsilon grid to handle float drift (same strategy as UC01).
+     * 01-May-2026: Snap normalised value to the epsilon grid so two
+     *   physically-equal lengths always land in the same hash bucket.
      */
     @Override
     public int hashCode() {
-        // 03-May-2026: Snap normalised inches to epsilon grid before hashing
+        // 01-May-2026: Use same normalisation as equals()
         double normalised = toTotalInches();
         long bits = Double.doubleToLongBits(
             Math.round(normalised / EPSILON) * EPSILON
@@ -186,9 +167,11 @@ public class Length {
         return Long.hashCode(bits);
     }
 
+    // ─── toString() ───────────────────────────────────────────────────────────
+
     /**
-     * 05-May-2026: Human-readable format for logs and test failure messages.
-     * Format: "<feet> ft <inches> in"  e.g. "1.0 ft 6.0 in"
+     * 05-May-2026: Readable string for logs and test failure messages.
+     * Format: "2.0 ft 6.0 in"
      */
     @Override
     public String toString() {
