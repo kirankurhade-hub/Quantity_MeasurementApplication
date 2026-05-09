@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    UC02-FeetAndInchesEquality — Module POM
+    Author  : BridgeLabz Dev Team
+    Created : 30-Apr-2026
+    Updated : 09-May-2026
+
+    UC02 - Feet and Inches Measurement Equality
+    Concepts: Object Encapsulation
+
+    Changelog:
+      30-Apr-2026 | Module POM created, inherits parent groupId/version
+      02-May-2026 | Confirmed JUnit 5 inherited from parent dependencyManagement
+      09-May-2026 | Final review before merge to dev
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 30-Apr-2026: Inherit shared config from parent POM -->
+    <parent>
+        <groupId>com.qm</groupId>
+        <artifactId>quantity-measurement-app</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>uc02-feet-and-inches-equality</artifactId>
+    <packaging>jar</packaging>
+
+    <name>UC02 - Feet and Inches Measurement Equality</name>
+    <description>
+        Object Encapsulation — encapsulate feet + inches into a single
+        Length value object with proper equality semantics.
+    </description>
+
+    <dependencies>
+        <!-- 02-May-2026: Inherited from parent; scope=test auto-applied -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+    </dependencies>
+</project>
