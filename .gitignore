@@ -82,7 +82,7 @@ UC16-JDBCIntegration/
 UC17-SpringBackend/
 UC18-GoogleAuthentication/
 UC20-ReactFrontend/
-dev/
-main/
+/dev/
+/main/
 quantity-measurement/
 .claude/
